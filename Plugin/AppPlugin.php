@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace Triplewood\Toolbox\Plugin;
 
 use Magento\Framework\AppInterface;
-use Magento\Framework\Profiler;
 use Triplewood\Toolbox\Driver\Accumulate;
 
 class AppPlugin

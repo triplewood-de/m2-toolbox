@@ -7,12 +7,11 @@ use Magento\Framework\App\State;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Triplewood\Toolbox\Model\ProfilerService;
 
 class ProfilerModeSetCommand extends Command
 {
-    public const string MODE = 'mode';
+    public const MODE = 'mode';
 
     /**
      * @param ProfilerService $profilerService
