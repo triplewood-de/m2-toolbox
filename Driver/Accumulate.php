@@ -7,7 +7,9 @@ use Magento\Framework\Profiler\Driver\Standard;
 
 class Accumulate extends Standard
 {
-
+    /**
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     */
     public function stop($timerId)
     {
         try {

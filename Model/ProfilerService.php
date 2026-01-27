@@ -8,6 +8,7 @@ use Magento\Developer\Console\Command\ProfilerEnableCommand;
 use Magento\Framework\App\State\CleanupFiles;
 use Magento\Framework\Filesystem\Io\File;
 use Magento\Framework\Profiler;
+use ReflectionClass;
 
 /**
  * Controls enabling and disabling of the extended Magento profiler.
@@ -15,7 +16,7 @@ use Magento\Framework\Profiler;
 class ProfilerService
 {
     public const MODE_SINGLE = 'single';
-    public const MODE_ACCUMULATE= 'accumulate';
+    public const MODE_ACCUMULATE = 'accumulate';
 
     private const BEFORE_PLUGIN_CALL = '$beforeResult = $pluginInstance->$pluginMethod($this, ...array_values($arguments));';
     private const AROUND_PLUGIN_CALL = '$result = $pluginInstance->$pluginMethod($subject, $next, ...array_values($arguments));';
@@ -44,6 +45,7 @@ class ProfilerService
 
     /**
      * @return void
+     * @SuppressWarnings(PHPMD.StaticAccess)
      */
     public function enable(): void
     {
@@ -57,6 +59,7 @@ class ProfilerService
 
     /**
      * @return void
+     * @SuppressWarnings(PHPMD.StaticAccess)
      */
     public function disable(): void
     {
@@ -128,6 +131,7 @@ class ProfilerService
         $traitDefinition = $this->unwrapPluginCall(self::BEFORE_PLUGIN_CALL, $traitDefinition);
         $traitDefinition = $this->unwrapPluginCall(self::AROUND_PLUGIN_CALL, $traitDefinition);
         $traitDefinition = $this->unwrapPluginCall(self::AFTER_PLUGIN_CALL, $traitDefinition);
+        $traitDefinition = $this->unwrapPluginCall(self::ORIGINAL_FUNCTION_CALL, $traitDefinition);
 
         $this->fileWriter->write($traitFile, $traitDefinition);
     }
@@ -165,7 +169,7 @@ class ProfilerService
      */
     private function getInterceptorTraitFile(): string
     {
-        $reflection = new \ReflectionClass(\Magento\Framework\Interception\Interceptor::class);
+        $reflection = new ReflectionClass(\Magento\Framework\Interception\Interceptor::class);
         return $reflection->getFileName();
     }
 }

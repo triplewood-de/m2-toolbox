@@ -10,13 +10,13 @@ class AppPlugin
 {
     public function __construct(
         private readonly Accumulate $accumulate,
-    )
-    {
-//        Profiler::add($accumulate);
-//        $accumulate->start('magento');
+    ) {
+        //        Profiler::add($accumulate);
+        //        $accumulate->start('magento');
     }
 
-    public function aroundLaunch(AppInterface $subject, callable $proceed) {
+    public function aroundLaunch(AppInterface $subject, callable $proceed)
+    {
         //$this->accumulate->init();
         return $proceed();
     }

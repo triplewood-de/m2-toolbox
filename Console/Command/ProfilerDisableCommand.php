@@ -39,6 +39,8 @@ class ProfilerDisableCommand extends Command
      * @param OutputInterface $output
      *
      * @return int
+     *
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
@@ -53,7 +55,8 @@ class ProfilerDisableCommand extends Command
                 'to disable extended profiling in all classes.' .
                 '</comment>'
             );
-        } else {
+        }
+        if ($this->appState->getMode() === State::MODE_DEVELOPER || $this->appState->getMode() === State::MODE_PRODUCTION) {
             $this->profilerService->clearGeneratedCode();
             $output->writeln(
                 '<comment>' .

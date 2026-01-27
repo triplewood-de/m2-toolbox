@@ -27,7 +27,7 @@ class ProfilerAnalyzePerformanceCommand extends Command
         'layout_render'
     ];
 
-    private const MAX_RESULTS = 30;
+    private const MAX_RESULTS = 50;
 
     private const DEFAULT_CSV_PATH = 'var/log/profiler.csv';
 
@@ -92,7 +92,7 @@ class ProfilerAnalyzePerformanceCommand extends Command
             }
 
             $output->writeln(
-                ($index+1) . ".\t" .
+                ($index + 1) . ".\t" .
                 number_format($row['aggregated_execution_time'], 2) . 's'
                 . "\t" . ' (' . $row['calls'] . ' calls)'
                 . "\t" . $row['name']

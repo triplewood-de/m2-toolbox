@@ -3,20 +3,20 @@ declare(strict_types=1);
 
 namespace Triplewood\Toolbox\Model;
 
+use RuntimeException;
+
 class AnalyzerService
 {
-    private const TOP_N = 20;
-
     /**
      * Parse profiler CSV and return analysis views.
      *
      * @param string $csvPath
-     * @return array<string, array<int, array<string, mixed>>>
+     * @return array
      */
     public function analyze(string $csvPath): array
     {
         if (!is_readable($csvPath)) {
-            throw new \RuntimeException('Profiler CSV not readable: ' . $csvPath);
+            throw new RuntimeException('Profiler CSV not readable: ' . $csvPath);
         }
 
         $rows = $this->parseCsv($csvPath);
@@ -26,14 +26,15 @@ class AnalyzerService
 
     /**
      * @param string $csvPath
-     * @return array<int, array<string, mixed>>
+     * @return array
      */
     private function parseCsv(string $csvPath): array
     {
         $rows = [];
+        $handle = fopen($csvPath, 'r');
 
-        if (($handle = fopen($csvPath, 'r')) === false) {
-            throw new \RuntimeException('Failed to open profiler CSV');
+        if ($handle === false) {
+            throw new RuntimeException('Failed to open profiler CSV');
         }
 
         while (($data = fgetcsv($handle)) !== false) {
@@ -42,12 +43,12 @@ class AnalyzerService
             }
 
             $rows[] = [
-                'stack'      => $data[0],
+                'stack' => $data[0],
                 'total_time' => (float)$data[1],
-                'avg_time'   => (float)$data[2],
-                'calls'      => (int)$data[3],
-                'emalloc'    => (int)str_replace(',', '', trim($data[4], '"')),
-                'realmem'    => (int)$data[5],
+                'avg_time' => (float)$data[2],
+                'calls' => (int)$data[3],
+                'emalloc' => (int)str_replace(',', '', trim($data[4], '"')),
+                'realmem' => (int)$data[5],
             ];
         }
 
@@ -77,9 +78,12 @@ class AnalyzerService
 
         $values = array_values($leafTimes);
 
-        usort($values, function ($a, $b) {
-            return ($a['aggregated_execution_time'] < $b['aggregated_execution_time']) ? 1 : -1;
-        });
+        usort(
+            $values,
+            function ($val1, $val2) {
+                return ($val1['aggregated_execution_time'] < $val2['aggregated_execution_time']) ? 1 : -1;
+            }
+        );
 
         return $values;
     }

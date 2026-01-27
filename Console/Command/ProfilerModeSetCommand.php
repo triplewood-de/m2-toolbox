@@ -30,7 +30,8 @@ class ProfilerModeSetCommand extends Command
     protected function configure(): void
     {
         $this->setName('triplewood:profiler:mode-set');
-        $this->setDescription('Set profiler mode of operation. Mode "single" means, the profiler.csv file '
+        $this->setDescription(
+            'Set profiler mode of operation. Mode "single" means, the profiler.csv file '
             . 'only contains data from the very last magento execution. Mode "accumulate" means, data is collected in '
             . 'profiler.csv over several calls until file is deleted.'
         );
