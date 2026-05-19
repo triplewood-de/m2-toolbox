@@ -82,6 +82,7 @@ class ProfilerAnalyzePerformanceCommand extends Command
         $output->writeln('<info>Here is a list of elements you should have a look at:</info>');
 
         $index = 0;
+        $totalTime = 0;
         foreach ($results as $row) {
             if ($index >= self::MAX_RESULTS) {
                 break;
@@ -91,9 +92,18 @@ class ProfilerAnalyzePerformanceCommand extends Command
                 continue;
             }
 
+            if ($totalTime <= 0) {
+                $totalTime = (int) ($row['aggregated_execution_time'] * 1000);
+            }
+
+            $currentTime = (int) ($row['aggregated_execution_time'] * 1000);
+
+            $percent = number_format($currentTime * 100.0 / $totalTime, 2);
+
             $output->writeln(
                 ($index + 1) . ".\t" .
-                number_format($row['aggregated_execution_time'], 2) . 's'
+                $currentTime . 'ms'
+                . "\t" . '(' . str_pad($percent, 6, ' ', STR_PAD_LEFT) . '%)'
                 . "\t" . ' (' . $row['calls'] . ' calls)'
                 . "\t" . $row['name']
             );

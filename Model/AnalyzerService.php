@@ -20,8 +20,22 @@ class AnalyzerService
         }
 
         $rows = $this->parseCsv($csvPath);
+        $filtered = $this->extractAggregatedLeafTimes($rows);
 
-        return $this->extractAggregatedLeafTimes($rows);
+        $magento = [];
+        foreach ($rows as $entry) {
+            if ($entry['stack'] === 'magento') {
+                $magento = [
+                    'name' => 'Magento Execution Time',
+                    'aggregated_execution_time' => $entry['total_time'],
+                    'calls' => (int) $entry['calls'],
+                ];
+                break;
+            }
+        }
+
+        array_unshift($filtered, $magento);
+        return $filtered;
     }
 
     /**
@@ -59,31 +73,59 @@ class AnalyzerService
 
     public function extractAggregatedLeafTimes(array $rows): array
     {
-        $leafTimes = [];
-
-        foreach ($rows as &$row) {
-            $stack = $row['stack'];
-            $stackParts = explode('->', $stack);
-            $leafName = end($stackParts);
-            if (!isset($leafTimes[$leafName])) {
-                $leafTimes[$leafName] = [
-                    'name' => $leafName,
-                    'aggregated_execution_time' => 0,
-                    'calls' => 0
-                ];
-            }
-            $leafTimes[$leafName]['aggregated_execution_time'] += $row['total_time'];
-            $leafTimes[$leafName]['calls'] += $row['calls'];
+        // Index all rows by their stack path for quick lookup
+        $stackIndex = [];
+        foreach ($rows as $row) {
+            $stackIndex[$row['stack']] = $row;
         }
 
-        $values = array_values($leafTimes);
+        $nodeTimes = [];
 
-        usort(
-            $values,
-            function ($val1, $val2) {
-                return ($val1['aggregated_execution_time'] < $val2['aggregated_execution_time']) ? 1 : -1;
+        foreach ($rows as $row) {
+            $stack = $row['stack'];
+            $parts = explode('->', $stack);
+            $nodeName = end($parts);
+
+            // Find direct children: rows whose stack is this stack + '->' + one more segment
+            $childrenTime = 0;
+            $prefix = $stack . '->';
+            foreach ($rows as $candidate) {
+                $candidateStack = $candidate['stack'];
+                // Must start with our stack + '->'
+                if (strncmp($candidateStack, $prefix, strlen($prefix)) !== 0) {
+                    continue;
+                }
+                // Must be exactly one level deeper (no further '->' after the prefix)
+                $remainder = substr($candidateStack, strlen($prefix));
+                if (strpos($remainder, '->') === false) {
+                    $childrenTime += $candidate['total_time'];
+                }
             }
-        );
+
+            $ownTime = $row['total_time'] - $childrenTime;
+
+            // Skip negligible own-time entries (noise from pure delegation)
+            if ($ownTime <= 0.0) {
+                continue;
+            }
+
+            if (!isset($nodeTimes[$nodeName])) {
+                $nodeTimes[$nodeName] = [
+                    'name'                      => $nodeName,
+                    'aggregated_execution_time' => 0.0,
+                    'calls'                     => 0,
+                ];
+            }
+
+            $nodeTimes[$nodeName]['aggregated_execution_time'] += $ownTime;
+            $nodeTimes[$nodeName]['calls']                     += $row['calls'];
+        }
+
+        $values = array_values($nodeTimes);
+
+        usort($values, static function (array $a, array $b): int {
+            return $b['aggregated_execution_time'] <=> $a['aggregated_execution_time'];
+        });
 
         return $values;
     }

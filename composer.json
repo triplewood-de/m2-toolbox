@@ -2,7 +2,7 @@
     "name": "triplewood-unique-solutions/m2-toolbox",
     "license": "MIT",
     "type": "magento2-module",
-    "version": "0.0.3",
+    "version": "0.0.2",
     "description": "A Magento 2 extension for debugging",
     "require": {
         "php": "~8.2",
