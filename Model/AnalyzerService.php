@@ -71,6 +71,9 @@ class AnalyzerService
         return $rows;
     }
 
+    /**
+     * @SuppressWarnings(PHPMD.ShortVariable)
+     */
     public function extractAggregatedLeafTimes(array $rows): array
     {
         // Index all rows by their stack path for quick lookup
